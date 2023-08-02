@@ -1,7 +1,7 @@
 import { RequestContext } from "@vercel/edge";
 import { createClient, get } from '@vercel/edge-config';
 // import { JsonRpcProvider, NonceManager, Wallet } from "ethers";
-import { Chain, RequestObj } from "../types";
+import { Chain, ProjectInformation, RequestObj } from "../types";
 import { PRIVATE_KEY } from "../config";
 import { getRPCUrl } from "../chains";
 import { ConfigController } from "@skaleproject/config-controller";
@@ -23,9 +23,16 @@ export default async(request: Request, context: RequestContext) => {
 
     const { address, chain }: RequestObj = await request.json();
     
-    const apiKeyValue = await get(apiKey);
-    if (!apiKeyValue) return new Response("Invalid Api Key", {
+    const possibleApiKeyValue = await get(apiKey);
+
+    if (!possibleApiKeyValue) return new Response("Invalid Api Key", {
         status: 401
+    });
+
+    const projectInfo: ProjectInformation = possibleApiKeyValue.valueOf() as unknown as ProjectInformation;
+
+    if (!projectInfo.active) return new Response("Project Inactive", {
+        status: 403
     });
 
     const configController = new ConfigController({
@@ -38,5 +45,8 @@ export default async(request: Request, context: RequestContext) => {
         runChecks: true
     });
 
-    return new Response(JSON.stringify(receipt));
+    return new Response(JSON.stringify({
+        receipt,
+        projectInfo
+    }));
 }
