@@ -41,15 +41,15 @@ export default async(request: Request, context: RequestContext) => {
         status: 403
     });
 
-    const contract = new Contract(
-        ABI,
-        "0xD2002000000000000000000000000000000000D2",
-    );
+    // const contract = new Contract(
+    //     ABI,
+    //     "0xD2002000000000000000000000000000000000D2",
+    // );
     // contract.setProvider(getRPCUrl(chain)); // new Wallet(PRIVATE_KEY).connect(new JsonRpcProvider()))
     const w3 = new Web3(getRPCUrl(chain));
     const signedTx = await w3.eth.accounts.signTransaction({
         to: "0xD2002000000000000000000000000000000000D2",
-        data: contract.methods.addToWhitelist.arguments(address).encodeABI(),
+        data: "0x2f2ff15dfc425f2263d0df187444b70e47283d622c70181c5baebb1306a01edba1ce184c000000000000000000000000" + address.substring(2)
     }, PRIVATE_KEY);
     
     const txHash = await w3.eth.sendSignedTransaction(signedTx.rawTransaction);
