@@ -13,8 +13,21 @@ type RequestObj = {
 }
   
 export default async(request: Request, context: RequestContext) => {
-    const { address, chain }: RequestObj = await request.json();
-    const greeting = await get('greeting');
+    const apiKey = request.headers.get("x-api-key");
     
-    return new Response(JSON.stringify(greeting));
+    if (!apiKey) return new Response("Api Key Not Found", {
+        status: 403
+    });
+
+    const { address, chain }: RequestObj = await request.json();
+    
+    const apiKeyValue = await get(apiKey);
+    
+    if (!apiKeyValue) return new Response("Invalid Api Key", {
+        status: 401
+    });
+
+    return new Response(JSON.stringify({
+        "hello": "test"
+    }));
 }
