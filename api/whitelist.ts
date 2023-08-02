@@ -19,7 +19,7 @@ export default async(request: Request, context: RequestContext) => {
     console.log(request.headers.entries());
     console.log(request.headers.get("x-api-key"));
 
-    if (!apiKey) return new Response("Api Key Not Found", {
+    if (apiKey === null) return new Response("Api Key Not Found", {
         status: 403
     });
 
@@ -28,14 +28,14 @@ export default async(request: Request, context: RequestContext) => {
     const possibleApiKeyValue = await get(apiKey);
     console.log("Possible API Key", possibleApiKeyValue);
 
-    if (!possibleApiKeyValue) return new Response("Invalid Api Key", {
+    if (possibleApiKeyValue === undefined || possibleApiKeyValue === null) return new Response("Invalid Api Key", {
         status: 401
     });
 
     const projectInfo: ProjectInformation = possibleApiKeyValue.valueOf() as unknown as ProjectInformation;
     console.log("Project Info", projectInfo);
 
-    if (!projectInfo.active) return new Response("Project Inactive", {
+    if (projectInfo.active === false) return new Response("Project Inactive", {
         status: 403
     });
 
