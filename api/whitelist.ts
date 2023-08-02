@@ -24,12 +24,14 @@ export default async(request: Request, context: RequestContext) => {
     const { address, chain }: RequestObj = await request.json();
     
     const possibleApiKeyValue = await get(apiKey);
+    console.log("Possible API Key", possibleApiKeyValue);
 
     if (!possibleApiKeyValue) return new Response("Invalid Api Key", {
         status: 401
     });
 
     const projectInfo: ProjectInformation = possibleApiKeyValue.valueOf() as unknown as ProjectInformation;
+    console.log("Project Info", projectInfo);
 
     if (!projectInfo.active) return new Response("Project Inactive", {
         status: 403
