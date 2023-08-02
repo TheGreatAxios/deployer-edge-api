@@ -1,7 +1,7 @@
 import { RequestContext } from "@vercel/edge";
-import { createClient, get } from '@vercel/edge-config';
-import ABI from "../abi.json";
-import { Chain, ProjectInformation, RequestObj } from "../types";
+import { get } from '@vercel/edge-config';
+import ABI from "../abi";
+import { ProjectInformation, RequestObj } from "../types";
 import { PRIVATE_KEY } from "../config";
 import { getRPCUrl } from "../chains";
 import { Wallet, JsonRpcProvider, Contract, isAddress } from "ethers";
