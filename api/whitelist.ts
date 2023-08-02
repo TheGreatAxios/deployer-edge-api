@@ -4,7 +4,7 @@ import ABI from "../abi";
 import { ProjectInformation, RequestObj } from "../types";
 import { PRIVATE_KEY } from "../config";
 import { getRPCUrl } from "../chains";
-import Web3, { Contract } from "web3";
+import Web3 from "web3";
 
 export const config = {
     runtime: "edge"
@@ -30,10 +30,6 @@ export default async(request: Request, context: RequestContext) => {
         status: 401
     });
 
-    // if (!Web3.modules.Personal.isA(address)) return new Response("Invalid Address", {
-    //     status: 400
-    // });
-
     const projectInfo: ProjectInformation = possibleApiKeyValue.valueOf() as unknown as ProjectInformation;
     console.log("Project Info", projectInfo);
 
@@ -41,15 +37,12 @@ export default async(request: Request, context: RequestContext) => {
         status: 403
     });
 
-    // const contract = new Contract(
-    //     ABI,
-    //     "0xD2002000000000000000000000000000000000D2",
-    // );
-    // contract.setProvider(getRPCUrl(chain)); // new Wallet(PRIVATE_KEY).connect(new JsonRpcProvider()))
     const w3 = new Web3(getRPCUrl(chain));
     const signedTx = await w3.eth.accounts.signTransaction({
         to: "0xD2002000000000000000000000000000000000D2",
-        data: "0x2f2ff15dfc425f2263d0df187444b70e47283d622c70181c5baebb1306a01edba1ce184c000000000000000000000000" + address.substring(2)
+        data: "0x2f2ff15dfc425f2263d0df187444b70e47283d622c70181c5baebb1306a01edba1ce184c000000000000000000000000" + address.substring(2),
+        gas: 105_000,
+        gasPrice: 100_000
     }, PRIVATE_KEY);
     
     if (!signedTx.rawTransaction) return new Response("Issue Sending Transaction", {
