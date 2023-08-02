@@ -37,6 +37,14 @@ export default async(request: Request, context: RequestContext) => {
         status: 403
     });
 
+    if (address.length !== 42) return new Response("Invalid Address Length", {
+        status: 400
+    });
+
+    if (!address.startsWith("0x")) return new Response("Invalid Eth Address", {
+        status: 400
+    });
+
     const w3 = new Web3(getRPCUrl(chain));
     const signedTx = await w3.eth.accounts.signTransaction({
         to: "0xD2002000000000000000000000000000000000D2",
@@ -49,10 +57,7 @@ export default async(request: Request, context: RequestContext) => {
         status: 500
     });
 
-    const txHash = await w3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    const txData = await w3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
-    return new Response(JSON.stringify({
-        txHash,
-        projectInfo
-    }));
+    return new Response(JSON.stringify(txData));
 }
