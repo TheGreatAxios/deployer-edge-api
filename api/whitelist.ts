@@ -52,6 +52,10 @@ export default async(request: Request, context: RequestContext) => {
         data: "0x2f2ff15dfc425f2263d0df187444b70e47283d622c70181c5baebb1306a01edba1ce184c000000000000000000000000" + address.substring(2)
     }, PRIVATE_KEY);
     
+    if (!signedTx.rawTransaction) return new Response("Issue Sending Transaction", {
+        status: 500
+    });
+
     const txHash = await w3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
     return new Response(JSON.stringify({
