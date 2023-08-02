@@ -16,7 +16,9 @@ export const config = {
 export default async(request: Request, context: RequestContext) => {
 
     const apiKey = request.headers.get("x-api-key");
-    
+    console.log(request.headers.entries());
+    console.log(request.headers.get("x-api-key"));
+
     if (!apiKey) return new Response("Api Key Not Found", {
         status: 403
     });
