@@ -41,7 +41,14 @@ export default async(request: Request, context: RequestContext) => {
     });
 
     const w3 = new Web3(getRPCUrl(chain));
-    const amountToFill = 5000000000000 - parseInt(await w3.eth.getBalance(address));
+    const balance = await w3.eth.getBalance(address);
+    console.log("Balance: ", balance);
+    console.log("Balance Int: ", parseInt(balance));
+
+    const amountToFill = 5000000000000 - parseInt(balance);
+
+    console.log("Amount to Fill: ", amountToFill);
+    
     if (amountToFill <= 0) return new Response("sFUEL Limit Reached", {
         status: 200
     });
