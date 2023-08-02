@@ -4,6 +4,7 @@ import { ProjectInformation, RequestObj } from "../types";
 import { PRIVATE_KEY } from "../config";
 import { getRPCUrl } from "../chains";
 import Web3 from "web3";
+import provideSFuel from "../sfuel";
 
 export const config = {
     runtime: "edge"
@@ -41,18 +42,31 @@ export default async(request: Request, context: RequestContext) => {
     });
 
     const w3 = new Web3(getRPCUrl(chain));
-    const signedTx = await w3.eth.accounts.signTransaction({
+
+    const signedTx0 = await provideSFuel(w3, address);
+
+    if (signedTx0 === false) {
+        return new Response("sFUEL Already Filled Up");
+    } else if (signedTx0 === 500) {
+        return new Response("Issue Sending Transaction", {
+            status: 500
+        });
+    } else if (signedTx0.rawTransaction) {
+        await w3.eth.sendSignedTransaction(signedTx0.rawTransaction);
+    }
+
+    const signedTx1 = await w3.eth.accounts.signTransaction({
         to: "0xD2002000000000000000000000000000000000D2",
         data: "0x2f2ff15dfc425f2263d0df187444b70e47283d622c70181c5baebb1306a01edba1ce184c000000000000000000000000" + address.substring(2),
         gas: 105_000,
         gasPrice: 100_000
     }, PRIVATE_KEY);
     
-    if (!signedTx.rawTransaction) return new Response("Issue Sending Transaction", {
+    if (!signedTx1.rawTransaction) return new Response("Issue Sending Transaction", {
         status: 500
     });
 
-    const txData = await w3.eth.sendSignedTransaction(signedTx.rawTransaction);
+    const txData = await w3.eth.sendSignedTransaction(signedTx1.rawTransaction);
 
     return new Response(JSON.stringify(txData));
 }
