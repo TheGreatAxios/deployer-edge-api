@@ -4,7 +4,7 @@ import ABI from "../abi";
 import { ProjectInformation, RequestObj } from "../types";
 import { PRIVATE_KEY } from "../config";
 import { getRPCUrl } from "../chains";
-import { Wallet, JsonRpcProvider, Contract, isAddress } from "ethers";
+import Web3, { Contract } from "web3";
 
 export const config = {
     runtime: "edge"
@@ -30,9 +30,9 @@ export default async(request: Request, context: RequestContext) => {
         status: 401
     });
 
-    if (!isAddress(address)) return new Response("Invalid Address", {
-        status: 400
-    });
+    // if (!Web3.modules.Personal.isA(address)) return new Response("Invalid Address", {
+    //     status: 400
+    // });
 
     const projectInfo: ProjectInformation = possibleApiKeyValue.valueOf() as unknown as ProjectInformation;
     console.log("Project Info", projectInfo);
@@ -42,16 +42,20 @@ export default async(request: Request, context: RequestContext) => {
     });
 
     const contract = new Contract(
-        "0xD2002000000000000000000000000000000000D2",
         ABI,
-        new Wallet(PRIVATE_KEY).connect(new JsonRpcProvider(getRPCUrl(chain)))
+        "0xD2002000000000000000000000000000000000D2",
     );
-
-
-    const receipt = await contract.addToWhitelist(address);
+    // contract.setProvider(getRPCUrl(chain)); // new Wallet(PRIVATE_KEY).connect(new JsonRpcProvider()))
+    const w3 = new Web3(getRPCUrl(chain));
+    const signedTx = await w3.eth.accounts.signTransaction({
+        to: "0xD2002000000000000000000000000000000000D2",
+        data: contract.methods.addToWhitelist.arguments(address).encodeABI(),
+    }, PRIVATE_KEY);
+    
+    const txHash = await w3.eth.sendSignedTransaction(signedTx.rawTransaction);
 
     return new Response(JSON.stringify({
-        receipt,
+        txHash,
         projectInfo
     }));
 }
