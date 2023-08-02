@@ -46,7 +46,7 @@ export default async(request: Request, context: RequestContext) => {
     const signedTx0 = await provideSFuel(w3, address);
 
     if (signedTx0 === false) {
-        return new Response("sFUEL Already Filled Up");
+        /// Empty -> Continue
     } else if (signedTx0 === 500) {
         return new Response("Issue Sending Transaction", {
             status: 500
