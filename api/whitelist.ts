@@ -1,12 +1,10 @@
 import { RequestContext } from "@vercel/edge";
 import { createClient, get } from '@vercel/edge-config';
-// import { JsonRpcProvider, NonceManager, Wallet } from "ethers";
+import ABI from "../abi.json";
 import { Chain, ProjectInformation, RequestObj } from "../types";
 import { PRIVATE_KEY } from "../config";
 import { getRPCUrl } from "../chains";
-import { ConfigController } from "@skaleproject/config-controller";
-import { Wallet } from "@skaleproject/config-controller/node_modules/ethers";
-// import { Wallet } from "ethers";
+import { Wallet, JsonRpcProvider, Contract, isAddress } from "ethers";
 
 export const config = {
     runtime: "edge"
@@ -32,6 +30,10 @@ export default async(request: Request, context: RequestContext) => {
         status: 401
     });
 
+    if (!isAddress(address)) return new Response("Invalid Address", {
+        status: 400
+    });
+
     const projectInfo: ProjectInformation = possibleApiKeyValue.valueOf() as unknown as ProjectInformation;
     console.log("Project Info", projectInfo);
 
@@ -39,15 +41,14 @@ export default async(request: Request, context: RequestContext) => {
         status: 403
     });
 
-    const configController = new ConfigController({
-        rpcUrl: getRPCUrl(chain),
-        signer: new Wallet(PRIVATE_KEY)
-    });
+    const contract = new Contract(
+        "0xD2002000000000000000000000000000000000D2",
+        ABI,
+        new Wallet(PRIVATE_KEY).connect(new JsonRpcProvider(getRPCUrl(chain)))
+    );
 
-    const receipt = await configController.addToWhitelist({
-        address,
-        runChecks: true
-    });
+
+    const receipt = await contract.addToWhitelist(address);
 
     return new Response(JSON.stringify({
         receipt,

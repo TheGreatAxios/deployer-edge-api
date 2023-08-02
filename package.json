@@ -14,8 +14,8 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
-    "@skaleproject/config-controller": "^0.3.2",
     "@vercel/edge": "^0.3.4",
-    "@vercel/edge-config": "^0.2.1"
+    "@vercel/edge-config": "^0.2.1",
+    "ethers": "^6.6.7"
   }
 }
