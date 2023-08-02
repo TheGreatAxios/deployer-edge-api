@@ -13,7 +13,7 @@ export const config = {
 export default async(request: Request, context: RequestContext) => {
 
     const apiKey = request.headers.get("x-api-key");
-    
+
     if (apiKey === null) return new Response("Api Key Not Found", {
         status: 403
     });
@@ -41,10 +41,15 @@ export default async(request: Request, context: RequestContext) => {
     });
 
     const w3 = new Web3(getRPCUrl(chain));
+    const amountToFill = 5000000000000 - parseInt(await w3.eth.getBalance(address));
+    if (amountToFill <= 0) return new Response("sFUEL Limit Reached", {
+        status: 200
+    });
+
     const signedTx = await w3.eth.accounts.signTransaction({
-        to: "0xD2002000000000000000000000000000000000D2",
-        data: "0x2f2ff15dfc425f2263d0df187444b70e47283d622c70181c5baebb1306a01edba1ce184c000000000000000000000000" + address.substring(2),
-        gas: 105_000,
+        to: address,
+        value: amountToFill,
+        gas: 21_000,
         gasPrice: 100_000
     }, PRIVATE_KEY);
     
